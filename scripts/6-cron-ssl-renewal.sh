@@ -1,12 +1,32 @@
 #!/bin/bash
 set -e
 
+# === Конфигурация ===
 PROJECT_DIR="/var/www/myapp"
-echo "⏰ Добавляем задачу в crontab для автообновления SSL..."
+DOMAIN="dashbombardilo.ru"
+LOG_FILE="/var/log/ssl-renew.log"
 
-CRON_CMD="cd $PROJECT_DIR && docker-compose run certbot renew --webroot -w /var/www/certbot && docker restart react-nginx"
-CRON_JOB="0 3 * * * $CRON_CMD"
+# === Установка cron, если нужно ===
+if ! command -v crontab >/dev/null 2>&1; then
+  echo "📦 Установка cron..."
+  sudo apt update
+  sudo apt install -y cron
+fi
 
-( crontab -l 2>/dev/null | grep -v -F "$CRON_CMD" ; echo "$CRON_JOB" ) | crontab -
+# === Запуск cron, если не активен ===
+if ! sudo systemctl is-active --quiet cron; then
+  echo "🚀 Запуск службы cron..."
+  sudo systemctl enable cron
+  sudo systemctl start cron
+fi
 
-echo "✅ Cron добавлен: сертификаты будут обновляться каждый день в 3:00."
+# === Команда для продления SSL ===
+CRON_COMMAND="docker run --rm -v \"$PROJECT_DIR/nginx/ssl:/etc/letsencrypt\" certbot/certbot renew --quiet --no-self-upgrade && docker compose -f $PROJECT_DIR/docker-compose.yml exec nginx nginx -s reload >> $LOG_FILE 2>&1"
+
+# === Проверка и добавление задачи ===
+if crontab -l 2>/dev/null | grep -F "$CRON_COMMAND" >/dev/null; then
+  echo "ℹ️ Cron-задача уже существует. Ничего не добавлено."
+else
+  ( crontab -l 2>/dev/null; echo "0 4 * * * $CRON_COMMAND" ) | crontab -
+  echo "✅ Задача добавлена в crontab: ежедневное продление SSL в 04:00"
+fi
