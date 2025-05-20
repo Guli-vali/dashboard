@@ -1,11 +1,14 @@
 #!/bin/bash
 set -e
 
-DOMAIN="dashbombardilo.ru"
-EMAIL="maslievilya1@gmail.com"
-PROJECT_DIR="/var/www/myapp"
-WEBROOT_PATH="$PROJECT_DIR/certbot/www"
-SSL_PATH="$PROJECT_DIR/nginx/ssl"
+# Загружаем переменные из scripts/deploy.env
+ENV_FILE="$(dirname "$0")/deploy.env"
+if [ ! -f "$ENV_FILE" ]; then
+  echo "❌ Не найден файл переменных окружения: $ENV_FILE"
+  exit 1
+fi
+
+source "$ENV_FILE"
 
 cd $PROJECT_DIR
 

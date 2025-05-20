@@ -1,10 +1,14 @@
 #!/bin/bash
 set -e
 
-# === Конфигурация ===
-PROJECT_DIR="/var/www/myapp"
-DOMAIN="dashbombardilo.ru"
-LOG_FILE="/var/log/ssl-renew.log"
+# Загружаем переменные из scripts/deploy.env
+ENV_FILE="$(dirname "$0")/deploy.env"
+if [ ! -f "$ENV_FILE" ]; then
+  echo "❌ Не найден файл переменных окружения: $ENV_FILE"
+  exit 1
+fi
+
+source "$ENV_FILE"
 
 # === Установка cron, если нужно ===
 if ! command -v crontab >/dev/null 2>&1; then
