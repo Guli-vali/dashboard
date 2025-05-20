@@ -33,7 +33,7 @@ export const Dashboard: React.FC = () => {
                 <MenuItem text="Logout" />
             </aside>
             <main className="flex flex-col flex-1 p-6 bg-green-50 overflow-auto gap-6">
-                <h2 className="text-2xl font-bold">Welcome to your dashboard</h2>
+                <h2 className="text-2xl font-bold">Welcome to your dashboardilo crocodilo</h2>
                 <div className="flex flex-wrap gap-6">
                     <Card title="Users" description="Manage user accounts and permissions." />
                     <Card title="Analytics" description="View detailed usage statistics." />
